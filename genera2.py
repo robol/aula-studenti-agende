@@ -6,6 +6,14 @@ import requests, browser_cookie3, json
 
 cj = browser_cookie3.chrome(domain_name = "agende.unipi.it")
 
+slots = [ 
+    ( "09:00", "11:00" ), 
+    ( "11:00", "13:30" ),
+    ( "14:00", "16:00" ),
+    ( "16:00", "18:00" ),
+    ( "18:00", "19:30" )
+]
+
 def add_slot(custom_id, text, start, end, maxBookings, booking_start, booking_end):
     data = {
         "customId": custom_id,
@@ -34,12 +42,7 @@ def add_slot(custom_id, text, start, end, maxBookings, booking_start, booking_en
 
 
 def crea_appuntamenti(customId, inizio, fine):
-    ora_inizio_mattina = datetime.timedelta(hours = 7, minutes = 00)
-    ora_fine_mattina   = datetime.timedelta(hours = 11, minutes = 30)
-    ora_inizio_pomeriggio = datetime.timedelta(hours = 12, minutes = 00)
-    ora_fine_pomeriggio = datetime.timedelta(hours = 17, minutes = 30)
     giorno = datetime.timedelta(days = 1)
-    ora = datetime.timedelta(hours = 1)
     anticipo_prenotazioni = datetime.timedelta(days = 2, hours = 2)
     maxBookings = 45
 
@@ -47,30 +50,21 @@ def crea_appuntamenti(customId, inizio, fine):
     
     while inizio <= fine:
         if inizio.weekday() < 5:
-            text = "Mattina - %s" % inizio.strftime("%d/%m/%y")
-            success = success and add_slot(customId, text,
-                                           (inizio + ora_inizio_mattina).isoformat(),
-                                           (inizio + ora_fine_mattina).isoformat(),
-                                           maxBookings,
-                                           (inizio - anticipo_prenotazioni).isoformat(),
-                                           (inizio + ora_fine_mattina).isoformat())
-            print("Aggiunto %s" % text)
-            
-            if not success:
-                return False
+            for slot in slots:
+                text = "%s - %s" % (slot[0], slot[1])
+                start_h, start_m = slot[0].split(":")
+                end_h, end_m = slot[1].split(":")
+                slotstart = datetime.timedelta(hours = int(start_h) - 2, minutes = int(start_m))
+                slotend   = datetime.timedelta(hours = int(end_h) - 2, minutes = int(end_m))
+                success = success and add_slot(customId, "", (inizio + slotstart).isoformat(), 
+                                               (inizio + slotend).isoformat(), 
+                                               maxBookings, 
+                                               (inizio - anticipo_prenotazioni).isoformat(),
+                                               (inizio + slotend).isoformat())
+                print("Aggiunto %s" % text)
 
-            text = "Pomeriggio - %s" % inizio.strftime("%d/%m/%y")
-            success = success and add_slot(customId, text,
-                                           (inizio + ora_inizio_pomeriggio).isoformat(),
-                                           (inizio + ora_fine_pomeriggio).isoformat(),
-                                           maxBookings,
-                                           (inizio - anticipo_prenotazioni).isoformat(),
-                                           (inizio + ora_fine_pomeriggio).isoformat())
-            print("Aggiunto %s" % text)
-            
-            if not success:
-                return False
-            
+                if not success:
+                    return False
 
         inizio = inizio + giorno
     
