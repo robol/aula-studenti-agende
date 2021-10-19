@@ -6,12 +6,12 @@ import requests, browser_cookie3, json
 
 cj = browser_cookie3.chrome(domain_name = "agende.unipi.it")
 
-slots = [ 
-    ( "09:00", "11:00" ), 
-    ( "11:00", "13:30" ),
-    ( "14:00", "16:00" ),
-    ( "16:00", "18:00" ),
-    ( "18:00", "19:30" )
+slots = [
+    ( "10:00", "12:00" ),
+    ( "12:00", "14:30" ),
+    ( "15:00", "17:00" ),
+    ( "17:00", "19:00" ),
+    ( "19:00", "20:30" )
 ]
 
 def add_slot(custom_id, text, start, end, maxBookings, booking_start, booking_end):
@@ -20,7 +20,7 @@ def add_slot(custom_id, text, start, end, maxBookings, booking_start, booking_en
         "slotText": text,
         "slotStart": start,
         "slotEnd": end,
-        "maxBookings": maxBookings,
+        "MaxBookings": int(maxBookings),
         "slotBookingStart": booking_start,
         "slotBookingEnd": booking_end
     }
@@ -37,17 +37,18 @@ def add_slot(custom_id, text, start, end, maxBookings, booking_start, booking_en
                       headers = headers)
 
     res = r.json()
+    if 'success' in res:
+        return res['success']
+    else:
+        print("Error:")
+        print(res)
 
-    return res['success']
 
-
-def crea_appuntamenti(customId, inizio, fine):
+def crea_appuntamenti(customId, inizio, fine, maxBookings):
     giorno = datetime.timedelta(days = 1)
     anticipo_prenotazioni = datetime.timedelta(days = 2, hours = 2)
-    maxBookings = 45
 
     success = True
-    
     while inizio <= fine:
         if inizio.weekday() < 5:
             for slot in slots:
@@ -76,7 +77,8 @@ if __name__ == "__main__":
     data_inizio = datetime.datetime.fromisoformat(sys.argv[2])
     data_fine   = datetime.datetime.fromisoformat(sys.argv[3])
     customid = sys.argv[1]
+    maxbookings = sys.argv[4] if len(sys.argv) > 4 else 45
 
-    app = crea_appuntamenti(customid, data_inizio, data_fine)
+    app = crea_appuntamenti(customid, data_inizio, data_fine, maxbookings)
 
     
