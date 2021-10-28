@@ -7,7 +7,7 @@ import requests, browser_cookie3, json
 cj = browser_cookie3.chrome(domain_name = "agende.unipi.it")
 
 slots = [
-    ( "10:00", "12:00" ),
+    ( "09:30", "12:00" ),
     ( "12:00", "14:30" ),
     ( "15:00", "17:00" ),
     ( "17:00", "19:00" ),
@@ -46,7 +46,7 @@ def add_slot(custom_id, text, start, end, maxBookings, booking_start, booking_en
 
 def crea_appuntamenti(customId, inizio, fine, maxBookings):
     giorno = datetime.timedelta(days = 1)
-    anticipo_prenotazioni = datetime.timedelta(days = 2, hours = 2)
+    anticipo_prenotazioni = datetime.timedelta(days = 2, hours = 1)
 
     success = True
     while inizio <= fine:
